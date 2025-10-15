@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Presentation Sharing - Presenter</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>QR-Based Presentation Sharing</h1>
+            <p>Create a session and share the QR code with students to collect their presentations.</p>
+        </header>
+
+        <main>
+            <section id="create-session">
+                <button id="create-btn" class="btn">Create Session</button>
+            </section>
+
+            <section id="session-info" class="hidden">
+                <h2>Session Created</h2>
+                <p>Share this QR code with students:</p>
+                <div id="qr-container">
+                    <img id="qr-code" alt="QR Code" />
+                </div>
+                <p>Or share this link: <span id="upload-link"></span></p>
+                <a id="view-btn" class="btn" target="_blank">View Uploads</a>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

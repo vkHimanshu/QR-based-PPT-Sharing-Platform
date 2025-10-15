@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Upload Presentation</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Upload Your Presentation</h1>
+            <p>Fill in your details and upload your PPT or PDF file.</p>
+        </header>
+
+        <main>
+            <form id="upload-form" class="upload-form">
+                <input type="hidden" id="sessionId" name="sessionId" />
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="Your Name" required />
+
+                <label for="rollNumber">Roll Number</label>
+                <input type="text" id="rollNumber" name="rollNumber" placeholder="Your Roll Number" required />
+
+                <label for="file">Select File (.ppt, .pptx, .pdf)</label>
+                <input type="file" id="file" name="file" accept=".ppt,.pptx,.pdf" required />
+
+                <button type="submit" class="btn">Upload</button>
+            </form>
+
+            <div id="message" class="message"></div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session');
+            const sessionInput = document.getElementById('sessionId');
+            const form = document.getElementById('upload-form');
+            const messageDiv = document.getElementById('message');
+
+            if (!sessionId) {
+                messageDiv.textContent = 'Invalid session. Please scan a valid QR code.';
+                form.style.display = 'none';
+                return;
+            }
+
+            sessionInput.value = sessionId;
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                messageDiv.textContent = '';
+
+                const formData = new FormData(form);
+
+                try {
+                    const response = await fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        messageDiv.textContent = '✅ File uploaded successfully!';
+                        form.reset();
+                    } else {
+                        messageDiv.textContent = '❌ ' + (result.error || 'Upload failed.');
+                    }
+                } catch (error) {
+                    messageDiv.textContent = '❌ Upload failed. Please try again.';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

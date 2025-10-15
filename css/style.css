@@ -1,0 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #000;
+    color: #0ff;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    max-width: 1200px;
+    width: 100%;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 10px #0ff;
+}
+
+header p {
+    font-size: 1.2rem;
+    color: #ccc;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.btn {
+    background-color: #0ff;
+    color: #000;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px #0ff;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn:hover {
+    background-color: #00caca;
+    box-shadow: 0 0 30px #00caca;
+    transform: scale(1.05);
+}
+
+.hidden {
+    display: none;
+}
+
+#session-info {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+#session-info h2 {
+    margin-bottom: 1rem;
+    font-size: 2rem;
+}
+
+#qr-container {
+    margin: 2rem 0;
+    display: flex;
+    justify-content: center;
+}
+
+#qr-code {
+    border: 2px solid #0ff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px #0ff;
+    max-width: 300px;
+    width: 100%;
+}
+
+#upload-link {
+    word-break: break-all;
+    color: #0ff;
+    font-weight: 600;
+}
+
+/* Upload page styles */
+.upload-form {
+    background-color: #111;
+    border: 1px solid #0ff;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 0 20px #0ff;
+    max-width: 500px;
+    width: 100%;
+    margin: 2rem auto;
+}
+
+.upload-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #0ff;
+}
+
+.upload-form input,
+.upload-form button {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #0ff;
+    border-radius: 8px;
+    background-color: #000;
+    color: #0ff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.upload-form input:focus {
+    outline: none;
+    box-shadow: 0 0 10px #0ff;
+}
+
+.upload-form button {
+    background-color: #0ff;
+    color: #000;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.upload-form button:hover {
+    background-color: #00caca;
+    box-shadow: 0 0 20px #00caca;
+}
+
+.message {
+    text-align: center;
+    margin-top: 1rem;
+    font-weight: 600;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    .btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    #qr-code {
+        max-width: 250px;
+    }
+
+    .upload-form {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    .btn {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    #qr-code {
+        max-width: 200px;
+    }
+}

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>View Uploads</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        .upload-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .upload-card {
+            background: #111;
+            border: 1px solid #0ff;
+            border-radius: 8px;
+            padding: 1rem;
+            width: 280px;
+            box-shadow: 0 0 10px #0ff;
+            color: #0ff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .upload-card h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.2rem;
+        }
+        .upload-card p {
+            margin: 0.2rem 0;
+            font-size: 0.9rem;
+        }
+        .btn-download {
+            margin-top: 1rem;
+            background-color: #0ff;
+            color: #000;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .btn-download:hover {
+            background-color: #00caca;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Uploaded Presentations</h1>
+            <p>List of all uploaded files for this session.</p>
+        </header>
+
+        <main>
+            <div id="upload-list" class="upload-list"></div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session');
+            const uploadList = document.getElementById('upload-list');
+
+            if (!sessionId) {
+                uploadList.innerHTML = '<p>Invalid session. Please access via a valid link.</p>';
+                return;
+            }
+
+            async function fetchUploads() {
+                try {
+                    const response = await fetch(`/view-data?session=${sessionId}`);
+                    const uploads = await response.json();
+
+                    uploadList.innerHTML = '';
+
+                    if (uploads.length === 0) {
+                        uploadList.innerHTML = '<p>No uploads yet.</p>';
+                        return;
+                    }
+
+                    uploads.forEach(upload => {
+                        const card = document.createElement('div');
+                        card.classList.add('upload-card');
+
+                        const title = document.createElement('h3');
+                        title.textContent = upload.originalName;
+
+                        const uploader = document.createElement('p');
+                        uploader.textContent = `Uploader: ${upload.uploader}`;
+
+                        const roll = document.createElement('p');
+                        roll.textContent = `Roll Number: ${upload.rollNumber}`;
+
+                        const time = document.createElement('p');
+                        time.textContent = `Uploaded: ${new Date(upload.uploadTime).toLocaleString()}`;
+
+                        const downloadBtn = document.createElement('a');
+                        downloadBtn.classList.add('btn-download');
+                        downloadBtn.href = `/download/${sessionId}/${upload.filename}`;
+                        downloadBtn.textContent = 'Download';
+                        downloadBtn.target = '_blank';
+
+                        card.appendChild(title);
+                        card.appendChild(uploader);
+                        card.appendChild(roll);
+                        card.appendChild(time);
+                        card.appendChild(downloadBtn);
+
+                        uploadList.appendChild(card);
+                    });
+                } catch (error) {
+                    uploadList.innerHTML = '<p>Error loading uploads.</p>';
+                }
+            }
+
+            fetchUploads();
+            setInterval(fetchUploads, 10000); // Refresh every 10 seconds
+        });
+    </script>
+</body>
+</html>
