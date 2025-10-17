@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const qrcode = require('qrcode');
+const cors = require('cors'); // Add this line
 
 const app = express();
 const PORT = 3000;
@@ -13,6 +14,7 @@ const PORT = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
+app.use(cors()); // Enable CORS for all routes
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -38,21 +40,12 @@ app.get('/view.html', (req, res) => {
 app.get('/create-session', async (req, res) => {
   const sessionId = uuidv4();
 
-  // Get your local IP address dynamically
-  const interfaces = os.networkInterfaces();
-  let localIP = 'localhost';
-  for (let key in interfaces) {
-    for (let iface of interfaces[key]) {
-      if (iface.family === 'IPv4' && !iface.internal) {
-        localIP = iface.address;
-        break;
-      }
-    }
-  }
+  // ✅ Detect whether you are running on Render or local
+  const baseUrl =
+    process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
 
-  // Use local IP for QR code URLs
-  const uploadUrl = `http://${localIP}:${PORT}/upload.html?session=${sessionId}`;
-  const viewUrl = `http://${localIP}:${PORT}/view.html?session=${sessionId}`;
+  const uploadUrl = `${baseUrl}/upload.html?session=${sessionId}`;
+  const viewUrl = `${baseUrl}/view.html?session=${sessionId}`;
 
   try {
     const qrCodeDataURL = await qrcode.toDataURL(uploadUrl);
@@ -61,6 +54,7 @@ app.get('/create-session', async (req, res) => {
     res.status(500).json({ error: 'Failed to generate QR code' });
   }
 });
+
 
 
 const storage = multer.diskStorage({

@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Failed to create session: ' + data.error);
             }
         } catch (error) {
-            alert('Error creating session. Please try again.');
+            alert('Server not activated. Please try again.');
             console.error(error);
         }
     });
