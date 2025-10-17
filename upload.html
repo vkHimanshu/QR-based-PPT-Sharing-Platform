@@ -33,46 +33,75 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const sessionId = urlParams.get('session');
-            const sessionInput = document.getElementById('sessionId');
-            const form = document.getElementById('upload-form');
-            const messageDiv = document.getElementById('message');
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session');
+    const sessionInput = document.getElementById('sessionId');
+    const form = document.getElementById('upload-form');
+    const messageDiv = document.getElementById('message');
 
-            if (!sessionId) {
-                messageDiv.textContent = 'Invalid session. Please scan a valid QR code.';
-                form.style.display = 'none';
-                return;
+    // Create progress bar
+    const progressBar = document.createElement('progress');
+    progressBar.value = 0;
+    progressBar.max = 100;
+    progressBar.style.display = 'none';
+    progressBar.style.width = '100%';
+    progressBar.style.marginTop = '10px';
+    form.appendChild(progressBar);
+
+    if (!sessionId) {
+        messageDiv.textContent = 'Invalid session. Please scan a valid QR code.';
+        form.style.display = 'none';
+        return;
+    }
+
+    sessionInput.value = sessionId;
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        messageDiv.textContent = '';
+        progressBar.value = 0;
+        progressBar.style.display = 'block';
+        progressBar.style.height = '15px';
+
+        const formData = new FormData(form);
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${window.location.origin}/upload`, true);
+
+        xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+                const percent = (e.loaded / e.total) * 100;
+                progressBar.value = percent;
+                messageDiv.textContent = `⏳ Uploading... ${Math.round(percent)}%`;
+                messageDiv.style.color = 'blue';
             }
+        };
 
-            sessionInput.value = sessionId;
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                messageDiv.textContent = '✅ File uploaded successfully!';
+                messageDiv.style.color = 'green';
+                progressBar.value = 100;
+                setTimeout(() => {
+                    progressBar.style.display = 'none';
+                    form.reset();
+                }, 1000);
+            } else {
+                messageDiv.textContent = '❌ Upload failed.';
+                messageDiv.style.color = 'red';
+            }
+        };
 
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                messageDiv.textContent = '';
+        xhr.onerror = () => {
+            messageDiv.textContent = '⚠️ Network error. Please try again.';
+            messageDiv.style.color = 'red';
+            progressBar.style.display = 'none';
+        };
 
-                const formData = new FormData(form);
+        xhr.send(formData);
+    });
+});
+</script>
 
-                try {
-                    const response = await fetch(`${window.location.origin}/upload`, {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok) {
-                        messageDiv.textContent = '✅ File uploaded successfully!';
-                        form.reset();
-                    } else {
-                        messageDiv.textContent = '❌ ' + (result.error || 'Upload failed.');
-                    }
-                } catch (error) {
-                    messageDiv.textContent = '❌ Upload failed. Please try again.';
-                }
-            });
-        });
-    </script>
 </body>
 </html>
