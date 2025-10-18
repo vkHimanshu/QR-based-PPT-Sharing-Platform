@@ -195,3 +195,13 @@ main {
         max-width: 200px;
     }
 }
+
+footer {
+    position: fixed;
+    bottom: 10px; /* Distance from bottom */
+    right: 15px;  /* Change to left: 15px; if you want bottom-left */
+    font-size: 14px;
+    color: #555;
+    font-style: italic;
+    opacity: 0.8;
+}

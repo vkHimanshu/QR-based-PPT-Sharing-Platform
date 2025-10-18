@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const qrcode = require('qrcode');
-const cors = require('cors'); // Add this line
+const cors = require('cors'); 
 
 const app = express();
 const PORT = 3000;
