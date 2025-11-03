@@ -89,36 +89,74 @@
                         return;
                     }
 
-                    uploads.forEach(upload => {
-                        const card = document.createElement('div');
-                        card.classList.add('upload-card');
+                   // ✅ Group uploads by uploader + roll number
+const grouped = {};
+uploads.forEach(upload => {
+    const key = `${upload.uploader}-${upload.rollNumber}`;
+    if (!grouped[key]) {
+        grouped[key] = {
+            uploader: upload.uploader,
+            rollNumber: upload.rollNumber,
+            files: [],
+            uploadTime: upload.uploadTime
+        };
+    }
+    grouped[key].files.push(upload);
+});
 
-                        const title = document.createElement('h3');
-                        title.textContent = upload.originalName;
+// ✅ Render each uploader as one card
+Object.values(grouped).forEach(user => {
+    const card = document.createElement('div');
+    card.classList.add('upload-card');
 
-                        const uploader = document.createElement('p');
-                        uploader.textContent = `Uploader: ${upload.uploader}`;
+    const title = document.createElement('h3');
+    title.textContent = user.uploader;
 
-                        const roll = document.createElement('p');
-                        roll.textContent = `Roll Number: ${upload.rollNumber}`;
+    const roll = document.createElement('p');
+    roll.textContent = `Roll Number: ${user.rollNumber}`;
 
-                        const time = document.createElement('p');
-                        time.textContent = `Uploaded: ${new Date(upload.uploadTime).toLocaleString()}`;
+    const time = document.createElement('p');
+    time.textContent = `Last Upload: ${new Date(user.uploadTime).toLocaleString()}`;
 
-                        const downloadBtn = document.createElement('a');
-                        downloadBtn.classList.add('btn-download');
-                        downloadBtn.href = `/download/${sessionId}/${upload.filename}`;
-                        downloadBtn.textContent = 'Download';
-                        downloadBtn.target = '_blank';
+    // ✅ List of files for this user
+    const fileList = document.createElement('div');
+    user.files.forEach(f => {
+        const fileRow = document.createElement('div');
+        fileRow.style.marginTop = '8px';
 
-                        card.appendChild(title);
-                        card.appendChild(uploader);
-                        card.appendChild(roll);
-                        card.appendChild(time);
-                        card.appendChild(downloadBtn);
+        if (f.originalName.endsWith('.png') || f.originalName.endsWith('.jpg') || f.originalName.endsWith('.jpeg')) {
+            const img = document.createElement('img');
+            img.src = `/download/${sessionId}/${f.filename}`;
+            img.alt = f.originalName;
+            img.style.maxWidth = '100%';
+            img.style.borderRadius = '6px';
+            img.style.marginTop = '5px';
+            fileRow.appendChild(img);
+        }
 
-                        uploadList.appendChild(card);
-                    });
+        const fileName = document.createElement('p');
+        fileName.textContent = f.originalName;
+
+        const downloadBtn = document.createElement('a');
+        downloadBtn.classList.add('btn-download');
+        downloadBtn.href = `/download/${sessionId}/${f.filename}`;
+        downloadBtn.textContent = 'Download';
+        downloadBtn.target = '_blank';
+
+        fileRow.appendChild(fileName);
+        fileRow.appendChild(downloadBtn);
+
+        fileList.appendChild(fileRow);
+    });
+
+    card.appendChild(title);
+    card.appendChild(roll);
+    card.appendChild(time);
+    card.appendChild(fileList);
+
+    uploadList.appendChild(card);
+});
+
                 } catch (error) {
                     uploadList.innerHTML = '<p>Error loading uploads.</p>';
                 }
