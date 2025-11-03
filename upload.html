@@ -14,29 +14,31 @@
         </header>
 
         <main>
-            <form id="upload-form" class="upload-form">
-                <input type="hidden" id="sessionId" name="sessionId" />
-                <label for="name">Name</label>
-                <input type="text" id="name" name="name" placeholder="Your Name" required />
+           <form id="upload-form" class="upload-form">
+    <input type="hidden" id="sessionId" name="sessionId" />
 
-                <label for="rollNumber">Roll Number</label>
-                <input type="text" id="rollNumber" name="rollNumber" placeholder="Your Roll Number" required />
+    <label for="name">Name</label>
+    <input type="text" id="name" name="name" placeholder="Your Name" required />
 
-                <label for="file">Select File (.ppt, .pptx, .pdf)</label>
-                <input type="file" id="file" name="file" accept=".ppt,.pptx,.pdf" required />
+    <label for="rollNumber">Roll Number</label>
+    <input type="text" id="rollNumber" name="rollNumber" placeholder="Your Roll Number" required />
 
-                <button type="submit" class="btn">Upload</button>
-            </form>
+    <label for="files">Select Files (.ppt, .pptx, .pdf, .png, .jpg)</label>
+    <input 
+        type="file" 
+        id="files" 
+        name="files" 
+        multiple 
+        accept=".ppt,.pptx,.pdf,.png,.jpg" 
+        required 
+    />
 
-            <div id="message" class="message"></div>
-        </main>
-    </div>
-       <footer>
-               <p>Developed by Himanshu Vk</p>
-       </footer>
+    <button type="submit" class="btn">Upload Files</button>
+</form>
 
+<div id="message" class="message"></div>
 
-    <script>
+<script>
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session');
@@ -44,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('upload-form');
     const messageDiv = document.getElementById('message');
 
-    // Create progress bar
     const progressBar = document.createElement('progress');
     progressBar.value = 0;
     progressBar.max = 100;
@@ -66,11 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
         messageDiv.textContent = '';
         progressBar.value = 0;
         progressBar.style.display = 'block';
-        progressBar.style.height = '15px';
 
         const formData = new FormData(form);
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', `${window.location.origin}/upload`, true);
+        xhr.open('POST', `${window.location.origin}/upload-multiple`, true);
 
         xhr.upload.onprogress = (e) => {
             if (e.lengthComputable) {
@@ -83,13 +83,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         xhr.onload = () => {
             if (xhr.status === 200) {
-                messageDiv.textContent = '✅ File uploaded successfully!';
+                const res = JSON.parse(xhr.responseText);
+                messageDiv.innerHTML = `
+                    ✅ Uploaded Successfully!<br>
+                    <strong>Files:</strong><br>
+                    ${res.files.map(f => `<a href="${f.url}" target="_blank">${f.name}</a>`).join('<br>')}
+                `;
                 messageDiv.style.color = 'green';
                 progressBar.value = 100;
                 setTimeout(() => {
                     progressBar.style.display = 'none';
                     form.reset();
-                }, 1000);
+                }, 2000);
             } else {
                 messageDiv.textContent = '❌ Upload failed.';
                 messageDiv.style.color = 'red';
@@ -106,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+
 
 </body>
 </html>
