@@ -58,8 +58,11 @@
         </header>
 
         <main>
-            <div id="upload-list" class="upload-list"></div>
-        </main>
+  <div id="uploads-container" class="uploads-container">
+    <!-- Cards will be generated dynamically -->
+  </div>
+</main>
+
     </div>
 
      <footer>
@@ -67,104 +70,91 @@
        </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const sessionId = urlParams.get('session');
-            const uploadList = document.getElementById('upload-list');
+async function loadUploads() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get("session");
+    const container = document.getElementById("uploads-container");
 
-            if (!sessionId) {
-                uploadList.innerHTML = '<p>Invalid session. Please access via a valid link.</p>';
-                return;
-            }
-
-            async function fetchUploads() {
-                try {
-                    const response = await fetch(`/view-data?session=${sessionId}`);
-                    const uploads = await response.json();
-
-                    uploadList.innerHTML = '';
-
-                    if (uploads.length === 0) {
-                        uploadList.innerHTML = '<p>No uploads yet.</p>';
-                        return;
-                    }
-
-                   // ✅ Group uploads by uploader + roll number
-const grouped = {};
-uploads.forEach(upload => {
-    const key = `${upload.uploader}-${upload.rollNumber}`;
-    if (!grouped[key]) {
-        grouped[key] = {
-            uploader: upload.uploader,
-            rollNumber: upload.rollNumber,
-            files: [],
-            uploadTime: upload.uploadTime
-        };
+    if (!sessionId) {
+        container.innerHTML = "<p>Invalid session.</p>";
+        return;
     }
-    grouped[key].files.push(upload);
-});
 
-// ✅ Render each uploader as one card
-Object.values(grouped).forEach(user => {
-    const card = document.createElement('div');
-    card.classList.add('upload-card');
+    const response = await fetch(`/view-data?session=${sessionId}`);
+    const uploads = await response.json();
+    container.innerHTML = "";
 
-    const title = document.createElement('h3');
-    title.textContent = user.uploader;
+    if (uploads.length === 0) {
+        container.innerHTML = "<p>No uploads yet.</p>";
+        return;
+    }
 
-    const roll = document.createElement('p');
-    roll.textContent = `Roll Number: ${user.rollNumber}`;
-
-    const time = document.createElement('p');
-    time.textContent = `Last Upload: ${new Date(user.uploadTime).toLocaleString()}`;
-
-    // ✅ List of files for this user
-    const fileList = document.createElement('div');
-    user.files.forEach(f => {
-        const fileRow = document.createElement('div');
-        fileRow.style.marginTop = '8px';
-
-        if (f.originalName.endsWith('.png') || f.originalName.endsWith('.jpg') || f.originalName.endsWith('.jpeg')) {
-            const img = document.createElement('img');
-            img.src = `/download/${sessionId}/${f.filename}`;
-            img.alt = f.originalName;
-            img.style.maxWidth = '100%';
-            img.style.borderRadius = '6px';
-            img.style.marginTop = '5px';
-            fileRow.appendChild(img);
+    // ✅ Group uploads by user (so one card per person)
+    const grouped = {};
+    uploads.forEach(file => {
+        const key = `${file.uploader}-${file.rollNumber}`;
+        if (!grouped[key]) {
+            grouped[key] = {
+                name: file.uploader,
+                roll: file.rollNumber,
+                time: file.uploadTime,
+                files: []
+            };
         }
-
-        const fileName = document.createElement('p');
-        fileName.textContent = f.originalName;
-
-        const downloadBtn = document.createElement('a');
-        downloadBtn.classList.add('btn-download');
-        downloadBtn.href = `/download/${sessionId}/${f.filename}`;
-        downloadBtn.textContent = 'Download';
-        downloadBtn.target = '_blank';
-
-        fileRow.appendChild(fileName);
-        fileRow.appendChild(downloadBtn);
-
-        fileList.appendChild(fileRow);
+        grouped[key].files.push(file);
     });
 
-    card.appendChild(title);
-    card.appendChild(roll);
-    card.appendChild(time);
-    card.appendChild(fileList);
+    Object.values(grouped).forEach(upload => {
+        const card = document.createElement("div");
+        card.classList.add("upload-card");
 
-    uploadList.appendChild(card);
-});
+        const header = document.createElement("div");
+        header.classList.add("upload-header");
+        header.innerHTML = `
+            <h3>${upload.name}</h3>
+            <p>Roll No: ${upload.roll}</p>
+            <small>${new Date(upload.time).toLocaleString()}</small>
+            <button class="toggle-btn">Show Files</button>
+        `;
+        card.appendChild(header);
 
-                } catch (error) {
-                    uploadList.innerHTML = '<p>Error loading uploads.</p>';
-                }
+        const fileList = document.createElement("div");
+        fileList.classList.add("file-list", "hidden");
+
+        upload.files.forEach(file => {
+            const fileItem = document.createElement("div");
+            fileItem.classList.add("file-item");
+
+            if (file.path.endsWith(".png") || file.path.endsWith(".jpg") || file.path.endsWith(".jpeg")) {
+                fileItem.innerHTML = `
+                    <img src="/download/${sessionId}/${file.filename}" alt="${file.originalName}" class="preview-img">
+                    <p>${file.originalName}</p>
+                    <a href="/download/${sessionId}/${file.filename}" download class="download-btn">Download</a>
+                `;
+            } else {
+                fileItem.innerHTML = `
+                    <p>${file.originalName}</p>
+                    <a href="/download/${sessionId}/${file.filename}" download class="download-btn">Download</a>
+                `;
             }
 
-            fetchUploads();
-            setInterval(fetchUploads, 10000); // Refresh every 10 seconds
+            fileList.appendChild(fileItem);
         });
-    </script>
+
+        card.appendChild(fileList);
+        container.appendChild(card);
+
+        // Toggle view/hide for files
+        header.querySelector(".toggle-btn").addEventListener("click", () => {
+            fileList.classList.toggle("hidden");
+            const btn = header.querySelector(".toggle-btn");
+            btn.textContent = fileList.classList.contains("hidden") ? "Show Files" : "Hide Files";
+        });
+    });
+}
+
+document.addEventListener("DOMContentLoaded", loadUploads);
+</script>
+
 </body>
 </html>
