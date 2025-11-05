@@ -22,6 +22,38 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 
+// ========= SESSION CODE SYSTEM =========
+const sessionsFile = path.join(__dirname, 'sessions.json');
+
+if (!fs.existsSync(sessionsFile)) {
+  fs.writeFileSync(sessionsFile, JSON.stringify({}), 'utf8');
+}
+
+function loadSessions() {
+  try {
+    return JSON.parse(fs.readFileSync(sessionsFile, 'utf8') || '{}');
+  } catch (err) {
+    console.error('Failed to load sessions.json', err);
+    return {};
+  }
+}
+
+function saveSessions(map) {
+  fs.writeFileSync(sessionsFile, JSON.stringify(map, null, 2), 'utf8');
+}
+
+function generateUniqueCode() {
+  const map = loadSessions();
+  for (let i = 0; i < 10000; i++) {
+    const code = Math.random() < 0.5
+      ? String(Math.floor(1000 + Math.random() * 9000))   // 4 digits
+      : String(Math.floor(10000 + Math.random() * 90000)); // 5 digits
+    if (!map[code]) return code;
+  }
+  return Date.now().toString().slice(-5);
+}
+
+
 // ========== ROUTES ==========
 
 // Serve static pages
@@ -29,22 +61,33 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/upload.html', (req, res) => res.sendFile(path.join(__dirname, 'upload.html')));
 app.get('/view.html', (req, res) => res.sendFile(path.join(__dirname, 'view.html')));
 
-// ✅ Create session + generate QR
+// ✅ Create session + generate QR + unique code
 app.get('/create-session', async (req, res) => {
   const sessionId = uuidv4();
   const baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
-
   const uploadUrl = `${baseUrl}/upload.html?session=${sessionId}`;
   const viewUrl = `${baseUrl}/view.html?session=${sessionId}`;
 
   try {
+    // Generate unique 4–5 digit code
+    const sessionsMap = loadSessions();
+    const code = generateUniqueCode();
+
+    // Save mapping
+    sessionsMap[code] = { sessionId, createdAt: new Date().toISOString() };
+    saveSessions(sessionsMap);
+
+    // Create QR Code
     const qrCodeDataURL = await qrcode.toDataURL(uploadUrl);
-    res.json({ sessionId, qrCode: qrCodeDataURL, viewUrl });
+
+    // Send response including code
+    res.json({ sessionId, code, qrCode: qrCodeDataURL, viewUrl });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to generate QR code' });
+    res.status(500).json({ error: 'Failed to generate session or QR code' });
   }
 });
+
 
 // ✅ Multer storage for sessions
 const storage = multer.diskStorage({
@@ -138,6 +181,22 @@ app.get('/download/:sessionId/:filename', (req, res) => {
   const filePath = path.join(uploadsDir, sessionId, filename);
   if (fs.existsSync(filePath)) res.download(filePath);
   else res.status(404).json({ error: 'File not found' });
+});
+// ✅ Access session using numeric code
+app.get('/session-code/:code', (req, res) => {
+  const code = req.params.code;
+  const sessionsMap = loadSessions();
+  const record = sessionsMap[code];
+
+  if (!record) {
+    return res.status(404).send('❌ Invalid session code.');
+  }
+
+  const baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  const viewUrl = `${baseUrl}/view.html?session=${record.sessionId}`;
+
+  // Redirect to view page for that session
+  return res.redirect(viewUrl);
 });
 
 // Start server

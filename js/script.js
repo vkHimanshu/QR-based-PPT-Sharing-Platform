@@ -26,6 +26,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 sessionInfo.classList.remove('hidden');
                 createBtn.style.display = 'none';
+                 // ✅ Display the session code if available
+                 if (data.code) {
+                   const codeElement = document.createElement('p');
+                   codeElement.style.marginTop = '1rem';
+                    codeElement.style.fontWeight = 'bold';
+                     codeElement.style.color = '#0ff';
+                     codeElement.textContent = `Session Code: ${data.code}`;
+                     sessionInfo.appendChild(codeElement);
+                          }
+
+
             } else {
                 alert('Failed to create session: ' + data.error);
             }
@@ -33,5 +44,32 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Server not activated. Please try again.');
             console.error(error);
         }
+    });
+});
+
+ // 🔍 Session Code Search Feature
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('session-code-input');
+    const btn = document.getElementById('search-btn');
+    const msg = document.getElementById('search-msg');
+
+    if (!input || !btn) return; // Skip if not on this page
+
+    btn.addEventListener('click', () => {
+        const code = (input.value || '').trim();
+        if (!/^\d{4,5}$/.test(code)) {
+            msg.textContent = '⚠️ Please enter a valid 4 or 5 digit code.';
+            msg.style.display = 'block';
+            return;
+        }
+        msg.style.display = 'none';
+
+        // Redirect to backend route which redirects to the view page
+        window.location.href = `/session-code/${encodeURIComponent(code)}`;
+    });
+
+    // Pressing Enter key also works
+    input.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') btn.click();
     });
 });

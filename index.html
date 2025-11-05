@@ -14,20 +14,37 @@
         </header>
 
         <main>
-            <section id="create-session">
-                <button id="create-btn" class="btn">Create Session</button>
-            </section>
+    <!-- 1️⃣ Create Session -->
+    <section id="create-session">
+        <button id="create-btn" class="btn">Create Session</button>
+    </section>
 
-            <section id="session-info" class="hidden">
-                <h2>Session Created</h2>
-                <p>Share this QR code with students:</p>
-                <div id="qr-container">
-                    <img id="qr-code" alt="QR Code" />
-                </div>
-                <p>Or share this link: <span id="upload-link"></span></p>
-                <a id="view-btn" class="btn" target="_blank">View Uploads</a>
-            </section>
-        </main>
+    <!-- 2️⃣ Search Session -->
+    <section id="search-session" style="text-align:center; margin-top:2rem;">
+        <h2>Access Existing Session</h2>
+        <p>Enter the 4 or 5 digit session code shared with you:</p>
+        <input 
+            type="text" 
+            id="session-code-input" 
+            placeholder="Enter Session Code"
+            style="padding:0.8rem; border-radius:8px; border:1px solid #0ff; background:#000; color:#0ff; width:200px;"
+        >
+        <button id="search-btn" class="btn" style="margin-left:10px;">Go</button>
+        <p id="search-msg" style="margin-top:10px; color:red; display:none;"></p>
+    </section>
+
+    <!-- 3️⃣ Session Info (After Creation) -->
+    <section id="session-info" class="hidden">
+        <h2>Session Created</h2>
+        <p>Share this QR code with students:</p>
+        <div id="qr-container">
+            <img id="qr-code" alt="QR Code" />
+        </div>
+        <p>Or share this link: <span id="upload-link"></span></p>
+        <a id="view-btn" class="btn" target="_blank">View Uploads</a>
+    </section>
+</main>
+
     </div>
 
      <footer>
