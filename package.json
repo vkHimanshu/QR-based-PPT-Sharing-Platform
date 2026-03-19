@@ -4,11 +4,15 @@
   "description": "QR-Based Presentation Sharing Web App",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "start:3001": "set PORT=3001&& node server.js",
+    "start:3002": "set PORT=3002&& node server.js",
+    "start:any": "set PORT=0&& node server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
     "multer": "^1.4.5-lts.1",
     "qrcode": "^1.5.4",
     "uuid": "^9.0.1"
