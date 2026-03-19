@@ -13,59 +13,74 @@
             <p>Create a session and share the QR code with students to collect their presentations.</p>
         </header>
 
-        <main>
-    <!-- 1️⃣ Create Session -->
-    <section id="create-session">
-        <button id="create-btn" class="btn">Create Session</button>
-    </section>
+        <nav class="home-nav" aria-label="Homepage navigation">
+            <button class="nav-btn is-active" type="button" data-panel="create-panel">Create Session</button>
+            <button class="nav-btn" type="button" data-panel="access-panel">Access Session</button>
+            <button class="nav-btn" type="button" data-panel="recent-panel">Recent Sessions</button>
+        </nav>
 
-    <!-- 2️⃣ Search Session -->
-    <section id="search-session" class="card">
-        <h2>Access Existing Session</h2>
-        <p>Enter the 4 or 5 digit session code shared with you:</p>
-        <div class="code-row">
-            <input
-                type="text"
-                id="session-code-input"
-                class="input"
-                placeholder="Enter Session Code"
-                inputmode="numeric"
-                autocomplete="one-time-code"
-            >
-            <button id="search-btn" class="btn btn-compact">Go</button>
-        </div>
-        <p id="search-msg" class="helper error hidden"></p>
-    </section>
+        <main class="home">
+            <section id="create-panel" class="panel is-active" aria-labelledby="nav-create">
+                <div class="panel-actions">
+                    <button id="create-btn" class="btn">Create Session</button>
+                </div>
 
-    <!-- 3️⃣ Session Info (After Creation) -->
-    <section id="session-info" class="hidden">
-        <h2>Session Created</h2>
-        <p>Share this QR code with students:</p>
-        <div id="qr-container">
-            <img id="qr-code" alt="QR Code" />
-        </div>
-        <div class="session-code-box">
-            <div class="session-code-label">Session Code</div>
-            <div class="session-code-row">
-                <div id="session-code" class="session-code">----</div>
-                <button id="copy-code-btn" class="btn btn-compact" type="button">Copy</button>
-            </div>
-            <div id="copy-code-msg" class="helper hidden"></div>
-        </div>
-        <p>Or share this link: <span id="upload-link"></span></p>
-        <a id="view-btn" class="btn" target="_blank">View Uploads</a>
-    </section>
+                <div id="session-info" class="card hidden">
+                    <h2>Session Created</h2>
+                    <p class="helper">Share this QR code with students:</p>
+                    <div id="qr-container">
+                        <div class="qr-frame">
+                            <img id="qr-code" alt="QR Code" />
+                        </div>
+                        <div class="qr-controls">
+                            <button id="qr-zoom-out" class="btn btn-compact" type="button">-</button>
+                            <button id="qr-zoom-reset" class="btn btn-compact" type="button">Reset</button>
+                            <button id="qr-zoom-in" class="btn btn-compact" type="button">+</button>
+                        </div>
+                    </div>
+                    <div class="session-code-box">
+                        <div class="session-code-label">Session Code</div>
+                        <div class="session-code-row">
+                            <div id="session-code" class="session-code">----</div>
+                            <button id="copy-code-btn" class="btn btn-compact" type="button">Copy</button>
+                        </div>
+                        <div id="copy-code-msg" class="helper hidden"></div>
+                    </div>
+                    <p>Or share this link: <span id="upload-link"></span></p>
+                    <a id="view-btn" class="btn" target="_blank">View Uploads</a>
+                </div>
+            </section>
 
-    <!-- 4️⃣ Recent sessions (saved in this browser) -->
-    <section id="recent-sessions" class="card">
-        <div class="recent-header">
-            <h2>Recent Sessions</h2>
-            <button id="clear-recent-btn" class="btn btn-compact" type="button">Clear</button>
-        </div>
-        <p class="helper">Saved on this device only (browser storage).</p>
-        <div id="recent-list" class="recent-list"></div>
-    </section>
-</main>
+            <section id="access-panel" class="panel" aria-labelledby="nav-access">
+                <div class="card">
+                    <h2>Access Existing Session</h2>
+                    <p>Enter the 4 or 5 digit session code shared with you:</p>
+                    <div class="code-row">
+                        <input
+                            type="text"
+                            id="session-code-input"
+                            class="input"
+                            placeholder="Enter Session Code"
+                            inputmode="numeric"
+                            autocomplete="one-time-code"
+                        >
+                        <button id="search-btn" class="btn btn-compact">Go</button>
+                    </div>
+                    <p id="search-msg" class="helper error hidden"></p>
+                </div>
+            </section>
+
+            <section id="recent-panel" class="panel" aria-labelledby="nav-recent">
+                <div class="card">
+                    <div class="recent-header">
+                        <h2>Recent Sessions</h2>
+                        <button id="clear-recent-btn" class="btn btn-compact" type="button">Clear</button>
+                    </div>
+                    <p class="helper">Saved on this device only (browser storage).</p>
+                    <div id="recent-list" class="recent-list"></div>
+                </div>
+            </section>
+        </main>
 
     </div>
 
