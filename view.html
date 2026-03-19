@@ -125,15 +125,19 @@ async function loadUploads() {
             const fileItem = document.createElement("div");
             fileItem.classList.add("file-item");
 
-            if (file.path.endsWith(".png") || file.path.endsWith(".jpg") || file.path.endsWith(".jpeg")) {
+            const displayName = file.originalName || file.filename || "file";
+            const lower = String(displayName).toLowerCase();
+            const isImage = lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg");
+
+            if (isImage) {
                 fileItem.innerHTML = `
-                    <img src="/download/${sessionId}/${file.filename}" alt="${file.originalName}" class="preview-img">
-                    <p>${file.originalName}</p>
+                    <img src="/download/${sessionId}/${file.filename}" alt="${displayName}" class="preview-img">
+                    <p>${displayName}</p>
                     <a href="/download/${sessionId}/${file.filename}" download class="download-btn">Download</a>
                 `;
             } else {
                 fileItem.innerHTML = `
-                    <p>${file.originalName}</p>
+                    <p>${displayName}</p>
                     <a href="/download/${sessionId}/${file.filename}" download class="download-btn">Download</a>
                 `;
             }
