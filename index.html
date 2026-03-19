@@ -20,17 +20,21 @@
     </section>
 
     <!-- 2️⃣ Search Session -->
-    <section id="search-session" style="text-align:center; margin-top:2rem;">
+    <section id="search-session" class="card">
         <h2>Access Existing Session</h2>
         <p>Enter the 4 or 5 digit session code shared with you:</p>
-        <input 
-            type="text" 
-            id="session-code-input" 
-            placeholder="Enter Session Code"
-            style="padding:0.8rem; border-radius:8px; border:1px solid #0ff; background:#000; color:#0ff; width:200px;"
-        >
-        <button id="search-btn" class="btn" style="margin-left:10px;">Go</button>
-        <p id="search-msg" style="margin-top:10px; color:red; display:none;"></p>
+        <div class="code-row">
+            <input
+                type="text"
+                id="session-code-input"
+                class="input"
+                placeholder="Enter Session Code"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+            >
+            <button id="search-btn" class="btn btn-compact">Go</button>
+        </div>
+        <p id="search-msg" class="helper error hidden"></p>
     </section>
 
     <!-- 3️⃣ Session Info (After Creation) -->
@@ -40,8 +44,26 @@
         <div id="qr-container">
             <img id="qr-code" alt="QR Code" />
         </div>
+        <div class="session-code-box">
+            <div class="session-code-label">Session Code</div>
+            <div class="session-code-row">
+                <div id="session-code" class="session-code">----</div>
+                <button id="copy-code-btn" class="btn btn-compact" type="button">Copy</button>
+            </div>
+            <div id="copy-code-msg" class="helper hidden"></div>
+        </div>
         <p>Or share this link: <span id="upload-link"></span></p>
         <a id="view-btn" class="btn" target="_blank">View Uploads</a>
+    </section>
+
+    <!-- 4️⃣ Recent sessions (saved in this browser) -->
+    <section id="recent-sessions" class="card">
+        <div class="recent-header">
+            <h2>Recent Sessions</h2>
+            <button id="clear-recent-btn" class="btn btn-compact" type="button">Clear</button>
+        </div>
+        <p class="helper">Saved on this device only (browser storage).</p>
+        <div id="recent-list" class="recent-list"></div>
     </section>
 </main>
 

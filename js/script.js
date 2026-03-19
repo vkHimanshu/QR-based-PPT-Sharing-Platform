@@ -4,6 +4,133 @@ document.addEventListener('DOMContentLoaded', () => {
     const qrCodeImg = document.getElementById('qr-code');
     const uploadLinkSpan = document.getElementById('upload-link');
     const viewBtn = document.getElementById('view-btn');
+    const sessionCodeEl = document.getElementById('session-code');
+    const copyCodeBtn = document.getElementById('copy-code-btn');
+    const copyCodeMsg = document.getElementById('copy-code-msg');
+    const recentList = document.getElementById('recent-list');
+    const clearRecentBtn = document.getElementById('clear-recent-btn');
+
+    const RECENT_KEY = 'qrps_recent_sessions_v1';
+
+    function loadRecent() {
+        try {
+            const raw = localStorage.getItem(RECENT_KEY);
+            const arr = raw ? JSON.parse(raw) : [];
+            return Array.isArray(arr) ? arr : [];
+        } catch {
+            return [];
+        }
+    }
+
+    function saveRecent(arr) {
+        try {
+            localStorage.setItem(RECENT_KEY, JSON.stringify(arr));
+        } catch {
+            // ignore storage errors
+        }
+    }
+
+    function formatTime(iso) {
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return '';
+        return d.toLocaleString();
+    }
+
+    function renderRecent() {
+        if (!recentList) return;
+        const recents = loadRecent();
+        if (recents.length === 0) {
+            recentList.innerHTML = `<div class="recent-empty">No saved sessions yet.</div>`;
+            return;
+        }
+
+        recentList.innerHTML = recents.map((s, idx) => {
+            const safeCode = String(s.code || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeUrl = String(s.viewUrl || '');
+            return `
+                <div class="recent-item">
+                    <div class="recent-meta">
+                        <div class="recent-code">${safeCode}</div>
+                        <div class="recent-time">${formatTime(s.createdAt)}</div>
+                    </div>
+                    <div class="recent-actions">
+                        <button class="btn btn-compact" type="button" data-copy-code="${safeCode}">Copy code</button>
+                        <a class="btn btn-compact" href="${safeUrl}" target="_blank" rel="noreferrer">Open</a>
+                        <button class="btn btn-compact" type="button" data-remove-index="${idx}">Remove</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function copyText(text) {
+        const t = String(text || '');
+        if (!t) return false;
+        try {
+            await navigator.clipboard.writeText(t);
+            return true;
+        } catch {
+            // Fallback for older browsers / insecure contexts
+            const ta = document.createElement('textarea');
+            ta.value = t;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                const ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                return ok;
+            } catch {
+                document.body.removeChild(ta);
+                return false;
+            }
+        }
+    }
+
+    function setCopyMsg(text, isError = false) {
+        if (!copyCodeMsg) return;
+        copyCodeMsg.textContent = text;
+        copyCodeMsg.classList.remove('hidden');
+        copyCodeMsg.classList.toggle('error', isError);
+        window.clearTimeout(setCopyMsg._t);
+        setCopyMsg._t = window.setTimeout(() => copyCodeMsg.classList.add('hidden'), 1800);
+    }
+
+    // Initial render of saved sessions
+    renderRecent();
+
+    if (recentList) {
+        recentList.addEventListener('click', async (e) => {
+            const target = e.target;
+            if (!(target instanceof HTMLElement)) return;
+
+            const code = target.getAttribute('data-copy-code');
+            if (code) {
+                const ok = await copyText(code);
+                setCopyMsg(ok ? 'Copied code.' : 'Could not copy.', !ok);
+                return;
+            }
+
+            const removeIndex = target.getAttribute('data-remove-index');
+            if (removeIndex != null) {
+                const idx = Number(removeIndex);
+                const recents = loadRecent();
+                if (Number.isInteger(idx) && idx >= 0 && idx < recents.length) {
+                    recents.splice(idx, 1);
+                    saveRecent(recents);
+                    renderRecent();
+                }
+            }
+        });
+    }
+
+    if (clearRecentBtn) {
+        clearRecentBtn.addEventListener('click', () => {
+            saveRecent([]);
+            renderRecent();
+        });
+    }
 
     createBtn.addEventListener('click', async () => {
         try {
@@ -26,16 +153,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 sessionInfo.classList.remove('hidden');
                 createBtn.style.display = 'none';
-                 // ✅ Display the session code if available
-                 if (data.code) {
-                   const codeElement = document.createElement('p');
-                   codeElement.style.marginTop = '1rem';
-                    codeElement.style.fontWeight = 'bold';
-                     codeElement.style.color = '#0ff';
-                     codeElement.textContent = `Session Code: ${data.code}`;
-                     sessionInfo.appendChild(codeElement);
-                          }
 
+                // Show and persist the session code
+                if (data.code && sessionCodeEl) {
+                    sessionCodeEl.textContent = data.code;
+
+                    const recents = loadRecent();
+                    const entry = { code: data.code, viewUrl: data.viewUrl, createdAt: new Date().toISOString() };
+                    const next = [entry, ...recents.filter(s => s && s.code !== data.code)].slice(0, 10);
+                    saveRecent(next);
+                    renderRecent();
+                }
 
             } else {
                 alert('Failed to create session: ' + data.error);
@@ -45,6 +173,14 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(error);
         }
     });
+
+    if (copyCodeBtn) {
+        copyCodeBtn.addEventListener('click', async () => {
+            const code = sessionCodeEl ? sessionCodeEl.textContent : '';
+            const ok = await copyText(code);
+            setCopyMsg(ok ? 'Copied session code.' : 'Could not copy.', !ok);
+        });
+    }
 });
 
  // 🔍 Session Code Search Feature
@@ -59,10 +195,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const code = (input.value || '').trim();
         if (!/^\d{4,5}$/.test(code)) {
             msg.textContent = '⚠️ Please enter a valid 4 or 5 digit code.';
-            msg.style.display = 'block';
+            msg.classList.remove('hidden');
             return;
         }
-        msg.style.display = 'none';
+        msg.classList.add('hidden');
 
         // Redirect to backend route which redirects to the view page
         window.location.href = `/session-code/${encodeURIComponent(code)}`;
