@@ -1,0 +1,8 @@
+{
+  "admins": {
+    "admin@gmail.com": {
+      "passwordHash": "$2b$10$8Ic2QO8CR3c0jZaKstXLIunK54HtiYfsgPsl2m7OrGtQ2GbB3BXay",
+      "createdAt": "2026-03-19T23:34:03.674Z"
+    }
+  }
+}

@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const navButtons = Array.from(document.querySelectorAll('.nav-btn'));
-    const panels = Array.from(document.querySelectorAll('.panel'));
     const createBtn = document.getElementById('create-btn');
     const sessionInfo = document.getElementById('session-info');
     const qrCodeImg = document.getElementById('qr-code');
@@ -11,33 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyCodeMsg = document.getElementById('copy-code-msg');
     const recentList = document.getElementById('recent-list');
     const clearRecentBtn = document.getElementById('clear-recent-btn');
-    const zoomOutBtn = document.getElementById('qr-zoom-out');
-    const zoomInBtn = document.getElementById('qr-zoom-in');
-    const zoomResetBtn = document.getElementById('qr-zoom-reset');
 
     const RECENT_KEY = 'qrps_recent_sessions_v1';
-    let qrScale = 1;
-
-    function setActivePanel(panelId) {
-        panels.forEach(p => p.classList.toggle('is-active', p.id === panelId));
-        navButtons.forEach(b => b.classList.toggle('is-active', b.getAttribute('data-panel') === panelId));
-    }
-
-    if (navButtons.length && panels.length) {
-        navButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const panelId = btn.getAttribute('data-panel');
-                if (panelId) setActivePanel(panelId);
-            });
-        });
-        // default
-        setActivePanel('create-panel');
-    }
-
-    function applyQrScale() {
-        if (!qrCodeImg) return;
-        qrCodeImg.style.transform = `scale(${qrScale})`;
-    }
 
     function loadRecent() {
         try {
@@ -161,15 +134,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     createBtn.addEventListener('click', async () => {
         try {
-            const response = await fetch('/create-session');
+            const response = await fetch('/create-session', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
             const data = await response.json();
 
             if (response.ok) {
-                setActivePanel('create-panel');
                 // Display QR code image
                 qrCodeImg.src = data.qrCode;
-                qrScale = 1;
-                applyQrScale();
 
                 // Show actual upload link, not base64
                 uploadLinkSpan.innerHTML = `
@@ -178,28 +148,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     </a>
                 `;
 
-                // Set View Uploads button link
-                viewBtn.href = data.viewUrl;
-
                 sessionInfo.classList.remove('hidden');
                 createBtn.style.display = 'none';
 
                 // Show and persist the session code
                 if (data.code && sessionCodeEl) {
                     sessionCodeEl.textContent = data.code;
-
-                    const recents = loadRecent();
-                    const entry = { code: data.code, viewUrl: data.viewUrl, createdAt: new Date().toISOString() };
-                    const next = [entry, ...recents.filter(s => s && s.code !== data.code)].slice(0, 10);
-                    saveRecent(next);
-                    renderRecent();
                 }
-
+            } else if (response.status === 401) {
+                alert('Only admin can create session. Please login to the admin panel.');
             } else {
                 alert('Failed to create session: ' + data.error);
             }
         } catch (error) {
-            alert('Server not activated. Please try again.');
+            alert('Server not activated or you are not logged in as admin. Please try again.');
             console.error(error);
         }
     });
@@ -209,27 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const code = sessionCodeEl ? sessionCodeEl.textContent : '';
             const ok = await copyText(code);
             setCopyMsg(ok ? 'Copied session code.' : 'Could not copy.', !ok);
-        });
-    }
-
-    if (zoomOutBtn) {
-        zoomOutBtn.addEventListener('click', () => {
-            qrScale = Math.max(0.6, Math.round((qrScale - 0.2) * 10) / 10);
-            applyQrScale();
-        });
-    }
-
-    if (zoomInBtn) {
-        zoomInBtn.addEventListener('click', () => {
-            qrScale = Math.min(2.5, Math.round((qrScale + 0.2) * 10) / 10);
-            applyQrScale();
-        });
-    }
-
-    if (zoomResetBtn) {
-        zoomResetBtn.addEventListener('click', () => {
-            qrScale = 1;
-            applyQrScale();
         });
     }
 });

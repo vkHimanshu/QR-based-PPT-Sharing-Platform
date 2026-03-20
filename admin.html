@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Panel - QR Presentation Sharing</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Admin Panel</h1>
+            <p>Manage sessions and uploaded files.</p>
+        </header>
+
+        <main>
+            <section id="auth" class="card">
+                <h2 id="auth-title">Admin Login</h2>
+                <form id="auth-form">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required />
+
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required />
+
+                    <button id="auth-submit" class="btn" type="submit">Login</button>
+                </form>
+
+                <p id="auth-toggle" class="helper" style="margin-top: 1rem;">
+                    <span id="auth-toggle-text">Need an account?</span>
+                    <button id="auth-toggle-btn" class="btn btn-compact" type="button">Register</button>
+                </p>
+
+                <p id="auth-msg" class="helper"></p>
+            </section>
+
+            <section id="dashboard" class="card hidden">
+                <div class="dashboard-header" style="display:flex; gap:1rem; justify-content:space-between; align-items:flex-start; flex-wrap:wrap;">
+                    <div>
+                        <h2>Dashboard</h2>
+                        <p id="dashboard-user" class="helper"></p>
+                    </div>
+                    <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                        <button id="btn-create-session" class="btn">Create Session</button>
+                        <button id="btn-logout" class="btn btn-compact">Logout</button>
+                    </div>
+                </div>
+
+                <div id="sessions-container">
+                    <h3>Sessions</h3>
+                    <div id="sessions-list" class="recent-list"></div>
+                </div>
+
+                <div id="uploads-panel" class="hidden" style="margin-top: 1.5rem;">
+                    <h3>Session Uploads</h3>
+                    <div id="uploads-list"></div>
+                    <button id="close-uploads" class="btn btn-compact" type="button">Close</button>
+                </div>
+            </section>
+        </main>
+
+    </div>
+
+    <footer>
+        <p>Developed by Himanshu Vk</p>
+    </footer>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
